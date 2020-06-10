@@ -16,7 +16,7 @@ Here is for instance a first graph of those temperature, since I have installed 
 
 _Interior temperature graph in my home since Feb. 2019 (step = 30min, celsius)_
 
-<img src='img/temperature.png' width='300'> </img>
+<img src='img/temperature.png' width='600'> </img>
 
 ### How to use it? 
 
