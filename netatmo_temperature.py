@@ -98,7 +98,7 @@ def pull_temperature_from_list(list_dates):
                      headers={'Authorization': 'Bearer '+access_token},
                      params={'home_id': features['home_id'],
                              'room_id': features['room_id'],
-                             'scale': '30min',
+                             'scale': '1hour',
                              'type': 'temperature',
                              'date_begin': list_dates[0],
                              'date_end': list_dates[1],
