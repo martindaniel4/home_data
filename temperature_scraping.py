@@ -81,12 +81,19 @@ def read_export_files(path):
             data.append(l)
     return data
 
-def export_temp_df(path):
+def get_ext_df(path):
     """
     Read all txt files, return a Pandas DataFrame.
     """
     data = read_export_files(path)
     data = [item for sublist in data for item in sublist]
     df = pd.DataFrame(data)
-    df.to_csv(os.path.join(path, 'temp_all_paris.csv'))
     return df
+
+def export_agg_df(path):
+    """
+    Read all txt files, return a Pandas DataFrame.
+    """
+    print('exporting to csv')
+    df = get_ext_df(path)
+    df.to_csv('tmp_ext_paris.csv')
