@@ -52,7 +52,7 @@ def parse_day(date):
 
 def write_file(date, list):
     date_file = date.strftime('%Y-%m-%d')
-    with open('export/export_temp_{date}.txt'.format(date=date_file), 'w') as f:
+    with open('temperature/export/export_temp_{date}.txt'.format(date=date_file), 'w') as f:
         f.write(str(list))
 
 def retrieve_temp_period(start_date, end_date):
@@ -96,4 +96,4 @@ def export_agg_df(path):
     """
     print('exporting to csv')
     df = get_ext_df(path)
-    df.to_csv('tmp_ext_paris.csv')
+    df.to_csv('temperature/export/tmp_ext_paris.csv')

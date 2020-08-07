@@ -1,6 +1,6 @@
 from datetime import datetime
-from netatmo_temperature import * 
-from temperature_scraping import * 
+from temperature.netatmo import *
+from temperature.exterior import *
 
 """"
 Utils functions to plot diff in temperature
