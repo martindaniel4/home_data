@@ -1,9 +1,10 @@
+# %%
 import requests
 import json
 import pandas as pd
 import numpy as np
 import os
-import seaborn as sns
+#import seaborn as sns
 from datetime import datetime
 
 """
@@ -52,6 +53,7 @@ def get_home_features():
     return {'home_id': home_id,
             'room_id': room_id,
             'setup_date': setup_date}
+
 
 def split_dates(start_date, end_date):
     """
@@ -138,5 +140,10 @@ def pull_temperature(start_date, end_date):
 
     df.rename(columns={0: 'temperature'},
               inplace=True)
+    # export Netatmo temperature to csv
+    df.to_csv('netatmo_temperature_{start_date}_{end_date}.csv'.format(
+        start_date=start_date, end_date=end_date))
 
     return df[['date', 'temperature']]
+
+# %%
