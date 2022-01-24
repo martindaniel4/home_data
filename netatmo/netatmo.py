@@ -204,6 +204,6 @@ def pull_boiler_data(start_date, end_date, metric='boileron', export=False):
 
 
 # %%
-pull_temperature('2020-01-01', '2022-01-15', export=True)
+pull_temperature('2020-01-01', '2022-01-23', export=True)
 
 # %%
