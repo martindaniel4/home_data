@@ -57,7 +57,7 @@ def parse_day(date):
 
 def write_file(date, list):
     date_file = date.strftime('%Y-%m-%d')
-    with open('/Users/martindaniel/Documents/compans_data/temperature/export/export_temp_{date}.txt'.format(date=date_file), 'w') as f:
+    with open('/Users/martindaniel/Documents/compans_data/temperature/export/daily_export/export_temp_{date}.txt'.format(date=date_file), 'w') as f:
         f.write(str(list))
 
 
@@ -70,7 +70,7 @@ def retrieve_temp_period(start_date, end_date):
     dates = pd.date_range(start=start_date, end=end_date)
 
     for d in dates:
-        if check_file_exist('/Users/martindaniel/Documents/compans_data/temperature/export',
+        if check_file_exist('/Users/martindaniel/Documents/compans_data/temperature/export/daily_export',
                             d) == False:
             result = parse_day(d)
             write_file(d, result)
