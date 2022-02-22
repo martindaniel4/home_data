@@ -4,7 +4,7 @@ Feel free to reach out to me on Twitter to discuss: [martindaniel4](https://twit
 
 ### Background
 
-In July 2018 my wife and I bought and revamp a home in Paris, France. The name of the street is 'Compans' so I named that repo 'Compans Data'. We love our place but one issue we have is the level of heat we experience. Since our flat has a single-glass ceiling (or "Verrière") the sun hits pretty hard and the prospect of extreme heat waves happening in Paris is worrysome.
+In July 2018 my wife and I bought and revamp a home in Paris, France. We love our place but one issue we have is the level of heat we experience. Since our flat has a single-glass ceiling (or "Verrière") the sun hits pretty hard and the prospect of extreme heat waves happening in Paris is worrysome.
 
 In February 2019, I acquired a Netatmo thermostat (see -  https://www.netatmo.com/fr-fr/energy/thermostat) that I connected to my heating system. In addition to remote control of my home temperature, it also collects temperature. Since Netatmo has an API I figured I would give it a try. 
 
