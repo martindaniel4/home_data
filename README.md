@@ -1,4 +1,4 @@
-## Compans Data
+## Home Data
 
 Feel free to reach out to me on Twitter to discuss: [martindaniel4](https://twitter.com/martindaniel4).
 
