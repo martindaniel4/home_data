@@ -6,6 +6,7 @@ import pandas as pd
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 
+ENV = 'prod'
 
 def get_args():
     """
@@ -26,7 +27,6 @@ def get_args():
         args = parser.parse_args()
         return args
 
-ENV = 'dev'
 NDAYS = 500
 if ENV == 'prod':
     RECIPIENT = [{'email': get_args().recipient}]
