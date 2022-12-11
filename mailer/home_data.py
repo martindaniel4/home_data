@@ -56,6 +56,7 @@ def pull_gaz_consumption_data():
     """
     Pulls the gaz consumption data from GRDF.
     """
+    print("pulling data from GRDF...")
     client = connect_grdf_client()
     client.update()
     data = client.data()
@@ -134,6 +135,7 @@ def build_html_body():
     return html_body
 
 def send_email():
+    print("Sending email...")
     configuration = sib_api_v3_sdk.Configuration()
     if ENV == 'dev':
         configuration.api_key['api-key'] = os.environ['SENDINBLUE_API_KEY']
@@ -153,3 +155,5 @@ def send_email():
         print(api_response)
     except ApiException as e:
         print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
+
+send_email()
