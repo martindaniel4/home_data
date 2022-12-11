@@ -1,10 +1,8 @@
 from __future__ import print_function
 import os
 import argparse
-from locale import D_FMT
 import pygazpar
 import pandas as pd
-from IPython.display import HTML
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 
