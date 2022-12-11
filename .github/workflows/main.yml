@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: python /mailer/home_data.py -u ${{ secrets.GAZPAR_USERNAME }} -p ${{ secrets.GAZPAR_PASSWORD }} -i ${{ secrets.GAZPAR_PCEIDENTIFIER }} -sb ${{ secrets.SENDINBLUE_API_KEY }} -r ${{ secrets.RECIPIENT_EMAIL }}
+      - run: python ${{ github.workspace }}/mailer/home_data.py -u ${{ secrets.GAZPAR_USERNAME }} -p ${{ secrets.GAZPAR_PASSWORD }} -i ${{ secrets.GAZPAR_PCEIDENTIFIER }} -sb ${{ secrets.SENDINBLUE_API_KEY }} -r ${{ secrets.RECIPIENT_EMAIL }}
