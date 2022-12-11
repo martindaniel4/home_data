@@ -1,12 +1,12 @@
-name: Run Python script daily
+name: Daily Home Data Email
 
 on:
   schedule:
-    - cron: '0 12 * * *'
+    - cron: "0 12 * * *"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: python script.py
+      - run: python /mailer/home_data.py -u ${{ secrets.GAZPAR_USERNAME }} -p ${{ secrets.GAZPAR_PASSWORD }} -i ${{ secrets.GAZPAR_PCEIDENTIFIER }} -sb ${{ secrets.SENDINBLUE_API_KEY }} -r ${{ secrets.RECIPIENT_EMAIL }}
