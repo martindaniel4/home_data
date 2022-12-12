@@ -15,4 +15,4 @@ jobs:
           pip install pygazpar
           pip install pandas
           pip install sib_api_v3_sdk
-      - run: python ${{ github.workspace }}/mailer/home_data.py -u ${{ secrets.GAZPAR_USERNAME_OFFICE }} -p ${{ secrets.GAZPAR_PASSWORD_OFFICE }} -i ${{ secrets.GAZPAR_PCEIDENTIFIER_OFFICE }} -sb ${{ secrets.SENDINBLUE_API_KEY_OFFICE }} -r ${{ secrets.RECIPIENT_EMAIL_OFFICE }}
+      - run: python ${{ github.workspace }}/mailer/home_data.py -u ${{ secrets.GAZPAR_USERNAME_OFFICE }} -p ${{ secrets.GAZPAR_PASSWORD_OFFICE }} -i ${{ secrets.GAZPAR_PCEIDENTIFIER_OFFICE }} -sb ${{ secrets.SENDINBLUE_API_KEY }} -r ${{ secrets.RECIPIENT_EMAIL_OFFICE }}
