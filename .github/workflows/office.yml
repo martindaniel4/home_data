@@ -1,4 +1,4 @@
-name: Daily Home Data Email
+name: Office Gaz Data Email
 
 on:
   schedule:
