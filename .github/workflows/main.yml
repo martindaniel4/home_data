@@ -2,7 +2,7 @@ name: Daily Home Data Email
 
 on:
   schedule:
-    - cron: "0 12 * * *"
+    - cron: "0 12 */3 * *"
   workflow_dispatch:
 
 jobs:
