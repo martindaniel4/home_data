@@ -6,9 +6,9 @@ import pygazpar
 import pandas as pd
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
-from temperature.exterior import retrieve_temp_period
+from temperature.exterior import parse_day
 
-ENV = 'dev'
+ENV = 'prod'
 
 
 def get_args():
@@ -32,7 +32,7 @@ def get_args():
 
 
 NDAYS = 500
-NWEEKS = 10  # number of weeks to display in the email
+NWEEKS = 5  # number of weeks to display in the email
 if ENV == 'prod':
     RECIPIENT = [{'email': get_args().recipient}]
 else:
@@ -76,7 +76,7 @@ def get_last_day():
     That allows us to know how far the data has been updated.
     """
     df = pull_gaz_consumption_data()
-    return pd.to_datetime(df['time_period'], format="%d/%m/%Y").max().strftime("%b %d, %Y")
+    return pd.to_datetime(df['time_period'], format="%d/%m/%Y").max()
 
 
 def get_run_date():
@@ -92,14 +92,37 @@ def get_exterior_temp():
     """
     end_date = get_last_day()
     start_date = pd.to_datetime(end_date) - pd.Timedelta(weeks=NWEEKS)
-    return retrieve_temp_period()
+    data = []
+    dates = pd.date_range(start=start_date, end=end_date)
+    for d in dates:
+        result = parse_day(d)
+        data.append(result)
+    days = d = [item for sublist in data for item in sublist]
+    df = pd.DataFrame(days)
+    df['datetime'] = pd.to_datetime(df['datetime'])
+    df['date'] = df['datetime'].dt.date
+    temp_day = df.groupby('date').agg({'temp': 'mean'}).reset_index()
+    return temp_day
+
+
+def build_daily_df():
+    """
+    Merge the gaz consumption data with the exterior temperature.
+    """
+    df = pull_gaz_consumption_data()
+    df['date'] = \
+        pd.to_datetime(df['time_period'],
+                       format='%d/%m/%Y').dt.date
+    temp_day = get_exterior_temp()
+    df = df.merge(temp_day, how='left', on='date')
+    return df
 
 
 def group_by_week():
     """
     Groups the gaz consumption data by week.
     """
-    df = pull_gaz_consumption_data()
+    df = build_daily_df()
     df['date'] = \
         pd.to_datetime(df['time_period'],
                        format='%d/%m/%Y')
@@ -107,7 +130,8 @@ def group_by_week():
         df.date.dt.to_period('W').dt.end_time.dt.date
 
     wf = df.groupby('week_ending')\
-        .agg({'energy_kwh': 'sum'})\
+        .agg({'energy_kwh': 'sum',
+              'temp': 'mean'})\
         .sort_values('week_ending')
     wf['energy_last_year'] = \
         wf['energy_kwh'].shift(52)
@@ -128,7 +152,7 @@ def build_html_weekly_table():
     week_table_html = \
         df.tail(NWEEKS)\
         .sort_values('week_ending',
-                     ascending=False)[['date', 'this_year', 'last_year']]\
+                     ascending=False)[['date', 'this_year', 'temp', 'last_year']]\
         .set_index('date')\
         .T.to_html(border=0)
     return week_table_html
@@ -139,7 +163,7 @@ def build_html_body():
     Builds the html body of the email.
     """
     run_date = get_run_date()
-    last_day = get_last_day()
+    last_day = get_last_day().strftime("%b %d, %Y")
     title = f"<h2>Home data, {run_date}</h2>"
     subtitle = f"<p>Data from GRDF updated until: {last_day}</p>"
     table = build_html_weekly_table()
@@ -182,5 +206,5 @@ def send_email():
 
 if ENV == 'prod':
     send_email()
-else:
-    print(build_html_body())
+
+# %%
