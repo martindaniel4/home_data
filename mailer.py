@@ -51,6 +51,7 @@ def connect_grdf_client():
                                  lastNDays=NDAYS)
     else:
         args = get_args()
+        print(args.username, args.password, args.identifier)
         client = pygazpar.Client(username=args.username,
                                  password=args.password,
                                  pceIdentifier=args.identifier,
