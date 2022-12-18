@@ -15,4 +15,5 @@ jobs:
           pip install pygazpar
           pip install pandas
           pip install sib_api_v3_sdk
+          pip install bs4
       - run: python ${{ github.workspace }}/mailer.py -u ${{ secrets.GAZPAR_USERNAME }} -p ${{ secrets.GAZPAR_PASSWORD }} -i ${{ secrets.GAZPAR_PCEIDENTIFIER }} -sb ${{ secrets.SENDINBLUE_API_KEY }} -r ${{ secrets.RECIPIENT_EMAIL }}
