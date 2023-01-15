@@ -1,4 +1,3 @@
-# %%
 from __future__ import print_function
 from sib_api_v3_sdk.rest import ApiException
 import sib_api_v3_sdk
@@ -186,6 +185,4 @@ def send_email():
         print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
 
 
-# send_email()
-
-# %%
+send_email()
