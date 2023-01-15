@@ -7,7 +7,7 @@ import pygazpar
 import argparse
 import os
 
-ENV = 'dev'
+ENV = 'prod'
 
 
 def get_args():
