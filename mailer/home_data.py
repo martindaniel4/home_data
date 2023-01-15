@@ -8,6 +8,7 @@ from sib_api_v3_sdk.rest import ApiException
 
 ENV = 'prod'
 
+
 def get_args():
     """
     Returns the arguments provided to the script.
@@ -27,30 +28,31 @@ def get_args():
         args = parser.parse_args()
         return args
 
+
 NDAYS = 500
 if ENV == 'prod':
     RECIPIENT = [{'email': get_args().recipient}]
 else:
     RECIPIENT = [{'email': ''}]
 
+
 def connect_grdf_client():
     """
     Builds the client to connect to GRDF.
     """
     if ENV == 'dev':
-        client = pygazpar.Client(username=os.environ['GAZPAR_EMAIL'],
-                                password=os.environ['GAZPAR_PWD'],
-                                pceIdentifier=os.environ['GAZPAR_IDENTIFIER'],
-                                meterReadingFrequency=pygazpar.Frequency.DAILY,
-                                lastNDays=NDAYS)
+        client = pygazpar.Client(pygazpar.JsonWebDataSource(
+            username=os.environ['GAZPAR_EMAIL'],
+            password=os.environ['GAZPAR_PWD'])
+        )
     else:
         args = get_args()
-        client = pygazpar.Client(username=args.username,
-                                password=args.password,
-                                pceIdentifier=args.identifier,
-                                meterReadingFrequency=pygazpar.Frequency.DAILY,
-                                lastNDays=NDAYS)
+        client = pygazpar.Client(pygazpar.JsonWebDataSource(
+            username=args.username,
+            password=args.password)
+        )
     return client
+
 
 def pull_gaz_consumption_data():
     """
@@ -58,9 +60,17 @@ def pull_gaz_consumption_data():
     """
     print("pulling data from GRDF...")
     client = connect_grdf_client()
-    client.update()
-    data = client.data()
-    return pd.DataFrame(data)
+    if ENV == 'dev':
+        data = client.loadSince(pceIdentifier=os.environ['GAZPAR_IDENTIFIER'],
+                                lastNDays=NDAYS,
+                                frequencies=[pygazpar.Frequency.DAILY])
+    else:
+        args = get_args()
+        data = client.loadSince(pceIdentifier=args.identifier,
+                                lastNDays=NDAYS,
+                                frequencies=[pygazpar.Frequency.DAILY])
+    return pd.DataFrame(data['daily'])
+
 
 def get_last_day():
     """
@@ -70,11 +80,13 @@ def get_last_day():
     df = pull_gaz_consumption_data()
     return pd.to_datetime(df['time_period'], format="%d/%m/%Y").max().strftime("%b %d, %Y")
 
+
 def get_run_date():
     """
     Returns the date of the run.
     """
     return pd.to_datetime('today').strftime("%b %d, %Y")
+
 
 def group_by_week():
     """
@@ -82,14 +94,14 @@ def group_by_week():
     """
     df = pull_gaz_consumption_data()
     df['date'] = \
-        pd.to_datetime(df['time_period'], 
+        pd.to_datetime(df['time_period'],
                        format='%d/%m/%Y')
     df['week_ending'] = \
         df.date.dt.to_period('W').dt.end_time.dt.date
 
     wf = df.groupby('week_ending')\
-      .agg({'energy_kwh': 'sum'})\
-      .sort_values('week_ending')
+        .agg({'energy_kwh': 'sum'})\
+        .sort_values('week_ending')
     wf['energy_last_year'] = \
         wf['energy_kwh'].shift(52)
     wf.reset_index(inplace=True)
@@ -97,22 +109,23 @@ def group_by_week():
         .dt.strftime("%b %d")
     return wf
 
+
 def build_html_weekly_table():
     """
     Builds the html body of the email.
     """
     df = group_by_week()
-    df.rename(columns={'energy_kwh': 'this_year', 
-                       'energy_last_year': 'last_year'}, 
+    df.rename(columns={'energy_kwh': 'this_year',
+                       'energy_last_year': 'last_year'},
               inplace=True)
     week_table_html = \
         df.tail(10)\
-            .sort_values('week_ending', 
-                            ascending=False)\
-            [['date', 'this_year', 'last_year']]\
-            .set_index('date')\
-            .T.to_html(border=0)
+        .sort_values('week_ending',
+                     ascending=False)[['date', 'this_year', 'last_year']]\
+        .set_index('date')\
+        .T.to_html(border=0)
     return week_table_html
+
 
 def build_html_body():
     """
@@ -125,7 +138,7 @@ def build_html_body():
     table = build_html_weekly_table()
 
     html_body = \
-    f"""<html>
+        f"""<html>
         <body>
             {title}
             {subtitle}
@@ -133,6 +146,7 @@ def build_html_body():
         </body>
     </html>"""
     return html_body
+
 
 def send_email():
     print("Sending email...")
@@ -143,17 +157,20 @@ def send_email():
         args = get_args()
         configuration.api_key['api-key'] = args.sendinblue
     # send email
-    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+    api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+        sib_api_v3_sdk.ApiClient(configuration))
     subject = f"Home data, {get_run_date()}"
-    sender = {"name":"Home Data","email":"homedata@martindaniel.co"}
+    sender = {"name": "Home Data", "email": "homedata@martindaniel.co"}
     html_content = build_html_body()
     to = RECIPIENT
-    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, html_content=html_content, sender=sender, subject=subject)
+    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+        to=to, html_content=html_content, sender=sender, subject=subject)
 
     try:
         api_response = api_instance.send_transac_email(send_smtp_email)
         print(api_response)
     except ApiException as e:
         print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
+
 
 send_email()
