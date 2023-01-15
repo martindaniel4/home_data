@@ -5,8 +5,11 @@ import pandas as pd
 import pygazpar
 import argparse
 import os
+from datetime import datetime
+from temperature import retrieve_temp_period
 
 ENV = 'prod'
+N_WEEKS = 3  # number of weeks to be displayed in the email
 
 
 def get_args():
@@ -88,6 +91,19 @@ def get_run_date():
     return pd.to_datetime('today').strftime("%b %d, %Y")
 
 
+def get_ext_temp(end):
+    """
+    Returns the exterior temperature for days between end (format: %Y-%m-%d)
+    and N_WEEKS ago.
+    """
+    end_date = datetime.strptime(end, '%Y-%m-%d')
+    date_n_weeks_ago = end_date - pd.DateOffset(weeks=N_WEEKS)
+    data = retrieve_temp_period(
+        date_n_weeks_ago, end_date, export=False, all_hours=False)
+    df = pd.DataFrame(data)
+    return df
+
+
 def group_by_week():
     """
     Groups the gaz consumption data by week.
@@ -96,13 +112,20 @@ def group_by_week():
     df['date'] = \
         pd.to_datetime(df['time_period'],
                        format='%d/%m/%Y')
+    df_temp = get_ext_temp(df['date'].max().strftime("%Y-%m-%d"))
+    df_temp['date'] = pd.to_datetime(
+        df_temp['datetime'], format='%Y-%m-%d').dt.floor('d')
+    df = df.merge(df_temp[['date', 'temp']], on='date', how='left')
     df['week_ending'] = \
         df.date.dt.to_period('W').dt.end_time.dt.date
 
     wf = df.groupby('week_ending')\
         .agg({'energy_kwh': 'sum',
-              'time_period': 'count'})\
+              'time_period': 'count',
+              'temp': 'mean'})\
         .sort_values('week_ending')
+    # round 2 decimals
+    wf = wf.round(decimals=2)
     wf['energy_last_year'] = \
         wf['energy_kwh'].shift(52)
     wf.reset_index(inplace=True)
@@ -113,27 +136,19 @@ def group_by_week():
     return wf
 
 
-def get_ext_temp():
-    """
-    Returns the exterior for days between today and last 10 weeks
-    """
-    today = pd.to_datetime('today')
-    n_weeks_ago = today - pd.DateOffset(weeks=10)
-    return temperature.exterior.get_ext_temp(n_weeks_ago, today)
-
-
 def build_html_weekly_table():
     """
     Builds the html body of the email.
     """
     df = group_by_week()
     df.rename(columns={'energy_kwh': 'this_year',
-                       'energy_last_year': 'last_year'},
+                       'energy_last_year': 'last_year',
+                       'temp': 'avg_temperature'},
               inplace=True)
     week_table_html = \
-        df.tail(10)\
+        df.tail(N_WEEKS)\
         .sort_values('week_ending',
-                     ascending=False)[['date', 'this_year', 'last_year']]\
+                     ascending=False)[['date', 'this_year', 'last_year', 'avg_temperature']]\
         .set_index('date')\
         .T.to_html(border=0)
     return week_table_html
