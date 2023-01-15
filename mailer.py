@@ -1,12 +1,13 @@
+# %%
 from __future__ import print_function
-import os
-import argparse
-import pygazpar
-import pandas as pd
-import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
+import sib_api_v3_sdk
+import pandas as pd
+import pygazpar
+import argparse
+import os
 
-ENV = 'prod'
+ENV = 'dev'
 
 
 def get_args():
@@ -100,14 +101,26 @@ def group_by_week():
         df.date.dt.to_period('W').dt.end_time.dt.date
 
     wf = df.groupby('week_ending')\
-        .agg({'energy_kwh': 'sum'})\
+        .agg({'energy_kwh': 'sum',
+              'time_period': 'count'})\
         .sort_values('week_ending')
     wf['energy_last_year'] = \
         wf['energy_kwh'].shift(52)
     wf.reset_index(inplace=True)
     wf['date'] = pd.to_datetime(wf.week_ending)\
         .dt.strftime("%b %d")
+    # filter only complete weeks (7 days)
+    wf = wf[wf.time_period == 7]
     return wf
+
+
+def get_ext_temp():
+    """
+    Returns the exterior for days between today and last 10 weeks
+    """
+    today = pd.to_datetime('today')
+    n_weeks_ago = today - pd.DateOffset(weeks=10)
+    return temperature.exterior.get_ext_temp(n_weeks_ago, today)
 
 
 def build_html_weekly_table():
@@ -173,4 +186,6 @@ def send_email():
         print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
 
 
-send_email()
+# send_email()
+
+# %%
