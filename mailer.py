@@ -9,7 +9,7 @@ from datetime import datetime
 from temperature import retrieve_temp_period
 
 ENV = 'prod'
-N_WEEKS = 3  # number of weeks to be displayed in the email
+N_WEEKS = 6  # number of weeks to be displayed in the email
 
 
 def get_args():
