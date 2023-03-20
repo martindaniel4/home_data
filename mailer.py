@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from temperature import retrieve_temp_period
 
-ENV = 'prod'
+ENV = 'dev'
 N_WEEKS = 6  # number of weeks to be displayed in the email
 
 
